@@ -1,0 +1,18 @@
+fastapi
+uvicorn[standard]
+
+SQLAlchemy
+psycopg2-binary
+
+python-dotenv
+httpx
+requests
+
+jinja2
+
+# Solana / Solders
+solana
+solders
+
+# Вспомогательные библиотеки (обычно ставятся вместе с FastAPI, но можно указать явно)
+pydantic

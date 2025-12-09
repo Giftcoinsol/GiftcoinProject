@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <title>Giftcoin - giveaway</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <!-- Modern font -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+        rel="stylesheet"
+    />
+
+    <link href="/static/css/main.css" rel="stylesheet" />
+</head>
+<body>
+<div class="page">
+
+    <!-- Background: image + soft overlay -->
+    <div class="hero-bg">
+        <div class="hero-bg-image"></div>
+        <div class="hero-bg-overlay"></div>
+    </div>
+
+    <!-- Top bar (fixed on scroll) -->
+    <header class="top-bar">
+        <div class="brand">
+            <!-- логотип: app/static/img/logo.png -->
+            <img src="/static/img/logo.png" alt="Giftcoin logo" class="brand-logo" />
+        </div>
+        <div class="token-pill">
+            <span class="token-value">{{ token_mint }}</span>
+        </div>
+    </header>
+
+    <!-- Main content -->
+    <main class="main-layout">
+
+        <!-- Hero text + form -->
+        <section class="hero">
+            <h1 class="hero-title">$GIFTCOIN</h1>
+            <p class="hero-line">
+                We collect creator fees from trading our token and give
+                <strong>70% back to the community</strong> in automatic giveaways.
+            </p>
+            <p class="hero-line">
+                Submit your Solana wallet once and you stay in for all future rounds.
+            </p>
+
+            <form id="join-form" class="join-form">
+                <label class="field">
+                    <span>Solana wallet address</span>
+                    <input
+                        type="text"
+                        name="wallet"
+                        id="wallet-input"
+                        placeholder="e.g. 4HroJ1HLbDRwhMh5AJGcysB9JJ2oQSyQVtzfR76yKJcm"
+                        required
+                    />
+                </label>
+
+                {% if recaptcha_site_key %}
+                    <div class="captcha-wrapper">
+                        <div
+                        class="g-recaptcha"
+                        data-sitekey="{{ recaptcha_site_key }}"
+                        ></div>
+                    </div>
+                {% endif %}
+
+                <button type="submit" class="primary-btn" id="join-button">
+                    Join giveaway
+                </button>
+            </form>
+
+            <div class="join-message" id="join-message"></div>
+
+            <div class="hero-notes">
+                <p>Giveaway rounds are executed automatically every few minutes.</p>
+                <p>30% of each round goes to the project owner, 70% to a random wallet.</p>
+            </div>
+        </section>
+
+        <!-- Latest winners -->
+        <section class="winners-section">
+            <div class="winners-header">
+                <h2>Latest winners</h2>
+                <p class="winners-subtitle">
+                    Live feed of recent giveaway payouts. New winners will smoothly appear at the top.
+                </p>
+            </div>
+
+            <div class="winners-list-shell">
+                <ul id="winners-list" class="winners-list">
+                    <!-- JS will append <li> here -->
+                </ul>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-left">
+            <span>© {{ token_mint }}</span>
+        </div>
+        <div class="footer-right">
+            <!-- X -->
+            <a href="https://x.com/solanagiftcoin" target="_blank" class="social-link">
+                <img src="/static/img/x.svg" alt="X" class="social-icon" />
+            </a>
+            <!-- GitHub -->
+            <a href="https://github.com/Giftcoinsol/GiftcoinProject" target="_blank" class="social-link">
+                <img src="/static/img/gh.svg" alt="GitHub" class="social-icon" />
+            </a>
+        </div>
+    </footer>
+</div>
+
+{% if recaptcha_site_key %}
+<script src="https://www.google.com/recaptcha/api.js" async defer></script>
+{% endif %}
+<script src="/static/js/main.js"></script>
+
+
+<script src="/static/js/main.js"></script>
+</body>
+</html>

@@ -1,94 +1,140 @@
-# Giftcoin – Giveaway Backend & Landing
+<p align="center">
+  <img src="app/static/img/logo.png" alt="Gift logo" width="160">
+</p>
 
-Backend + simple landing page for automated giveaways of creator fees from the **$GIFTCOIN** token on Solana.
+<h1 align="center">GIFT$ – Automated Giveaways on Solana</h1>
 
-- Backend built with **FastAPI**
-- Database: **PostgreSQL** (SQLite for local dev is also supported)
-- Integration with **Pump.fun / PumpPortal**
-- Automatic giveaway rounds every N minutes (worker)
-- Landing page with join form and live winners feed
+GIFT$ is a Solana meme token where a portion of **creator fees from trading is redistributed back to the community**.
 
----
+Every time someone trades $GIFT, fees accumulate. A background worker periodically:
 
-## 🚀 Tech Stack
+- collects creator fees,
+- keeps a small reserve for gas,
+- sends **70% to a random participant**,  
+- sends **30% to the project owner** for development and operational costs.
 
-- **Python 3.12**
-- **FastAPI** + **Uvicorn**
-- **SQLAlchemy**
-- **PostgreSQL** / SQLite
-- **solana-py** + **solders**
-- **PumpPortal API** (Lightning + Local trade-local)
-- **Jinja2** templates
-- Static: HTML / CSS / JS
-
+You submit your wallet once — and you remain in all future giveaways automatically.
 
 ---
 
-## 🔁 Giveaway Logic (High Level)
+## 💡 How $GIFT Works
 
-1. **Collect creator fees**
-   - If `DEVNET=1` → fee collection is skipped (test mode).
-   - If `DEVNET=0`:
-     - If `PUMPPORTAL_API_KEY` is set → use **Lightning API**
-     - If `PUMPPORTAL_API_KEY` is empty → use **trade-local**:
-       - request serialized transaction from PumpPortal,
-       - sign it with `CREATOR_PRIVATE_KEY_BASE58`,
-       - send it to `SOLANA_RPC_URL`.
+Whenever $GIFT is traded:
 
-2. **Distribute funds**
-   - Keep a small reserve `RESERVE_SOL` on the creator wallet for future fees.
-   - Remaining balance is split into:
-     - `owner_part` → `OWNER_WALLET` (e.g. 30%)
-     - `raffle_part` → random participant (70%)
+1. **Creator fees accumulate** on the token's creator wallet.
+2. The backend worker integrates with **Pump.fun / PumpPortal** to:
+   - collect the fees,
+   - check the current balance,
+   - keep a small **reserve (`RESERVE_SOL`)**,
+   - split the remaining balance:
+     - **70% → a random participant**,
+     - **30% → the owner wallet**.
+3. Payouts:
+   - are sent on-chain in **SOL**,
+   - include a real transaction signature,
+   - are saved in the database,
+   - appear on the website in the **Latest winners** feed.
 
-3. **Store winner in DB**
-   - Winner is saved in `raffle_winners` with amount and tx signature.
-   - Frontend uses `/api/winners/latest` to show the latest payouts.
-
----
-
-## 🎨 Frontend Overview
-
-The landing page (`index.html` + `main.css` + `main.js`) is a minimalist, responsive layout:
-
-- Fixed top bar with:
-  - token logo on the left,
-  - token mint address on the right.
-- Centered content with:
-  - title: `$GIFTCOIN giveaway`
-  - short project description,
-  - input field for Solana wallet,
-  - **Join giveaway** button.
-- Bottom footer with:
-  - X (Twitter) icon,
-  - GitHub icon.
-- Scrollable “Latest winners” list:
-  - `tx` link to Solscan,
-  - shortened winner wallet,
-  - payout amount in SOL.
+No manual triggers. No admin decisions.  
+**Giveaways run automatically and consistently in the background.**
 
 ---
 
-## 🔐 Solana Wallet Validation
+## 🎟 How to Join the Giveaway
 
-The backend strictly validates wallet input:
+1. Get a Solana wallet  
+   (Phantom, Solflare, Backpack, etc.)
 
-- must be a valid **base58** string,
-- must successfully parse via `Pubkey.from_string(...)`,
-- invalid wallets return `HTTP 400` with `"Invalid Solana wallet address"`,
-- duplicates are not created (one wallet → one participant entry).
+2. Go to the $GIFT website and:
+   - enter your **Solana address**,
+   - complete the captcha,
+   - press **Join giveaway**.
 
-This prevents garbage strings from polluting the participants list.
+3. After that:
+   - you are added to the global participants list,
+   - you automatically participate in every future giveaway,
+   - no need to resubmit your wallet ever again.
+
+> You don’t have to trade or hold $GIFT to join the raffle —  
+> but trading volume is what actually fills the reward pool.
 
 ---
 
-## 📬 Project Links
+## 🤝 Why You Can Trust the System
+
+Not asking you to “just trust us” — here is what makes the setup reliable:
+
+### ✅ 1. All payouts are fully on-chain  
+- Winners receive SOL directly on the Solana blockchain.  
+- Every payout has a **tx signature** visible in Solscan.  
+- The website shows these signatures publicly, so anyone can verify payouts.
+
+### ✅ 2. Open source backend  
+The entire backend logic is here in this repository:
+
+- how winners are chosen,
+- the exact **70% / 30%** split,
+- PumpPortal integration,
+- wallet validation,
+- raffle worker logic.
+
+You can inspect, audit, or even self-host it if you want.
+
+### ✅ 3. Transparent payout rules  
+The giveaway split is simple and fixed:
+
+- **70%** → random participant  
+- **30%** → project owner  
+- small reserve kept for fees
+
+These numbers are explicitly defined in the worker code — nothing hidden.
+
+### ✅ 4. No private keys from users  
+You only submit a **public Solana wallet address**.  
+We never request:
+- private keys  
+- seed phrases  
+- secret keys  
+
+All signing happens only with the creator wallet’s private key stored server-side.
+
+---
+
+## 🛠 Under the Hood (for devs & auditors)
+
+**Language:** Python 3.12  
+**Backend:** FastAPI + Uvicorn  
+**Database:** PostgreSQL (SQLite supported for development)  
+**ORM:** SQLAlchemy  
+**Solana libraries:** `solana-py` + `solders`  
+
+**Pump.fun / PumpPortal integration:**
+- Lightning API (`/api/trade`)
+- Local `trade-local` mode:
+  - request serialized transaction
+  - sign with `CREATOR_PRIVATE_KEY_BASE58`
+  - broadcast through `SOLANA_RPC_URL`
+
+**Raffle Worker Logic:**
+- runs every N minutes,
+- collects creator fees,
+- keeps reserve,
+- splits balance 70/30,
+- selects a random participant,
+- sends SOL on-chain,
+- logs results in `raffle_winners`.
+
+**Frontend:**
+- Jinja2 templates  
+- static HTML/CSS/JS  
+- join form with captcha  
+- scrolling “Latest winners” feed with Solscan links  
+
+
+---
+
+## 📎 Links
 
 - X (Twitter): https://x.com/solanagiftcoin  
 - GitHub: https://github.com/Giftcoinsol/GiftcoinProject  
-
----
-
-## 📄 License
-
-MIT License
+- Our website: https://giftcoinsol.online

@@ -16,7 +16,7 @@ router = APIRouter(prefix="/api/participants", tags=["participants"])
 
 class ParticipantJoinRequest(BaseModel):
     wallet: str
-    recaptcha_token: str | None = None  # токен от reCAPTCHA (g-recaptcha-response)
+    recaptcha_token: str | None = None
 
 
 class ParticipantJoinResponse(BaseModel):
@@ -25,11 +25,7 @@ class ParticipantJoinResponse(BaseModel):
 
 
 def _validate_solana_wallet(addr: str) -> str:
-    """
-    Проверка, что строка — валидный Solana public key (base58, 32 байта).
-    Возвращает нормализованную строку (без пробелов).
-    Бросает HTTPException, если адрес невалидный.
-    """
+
     cleaned = addr.strip()
     if not cleaned:
         raise HTTPException(
@@ -49,13 +45,9 @@ def _validate_solana_wallet(addr: str) -> str:
 
 
 def _verify_recaptcha(token: str, remote_ip: str | None = None) -> bool:
-    """
-    Проверка Google reCAPTCHA v2.
-    Если RECAPTCHA_SECRET не задан, считаем что капча выключена и всегда возвращаем True.
-    """
+
     secret = settings.RECAPTCHA_SECRET
     if not secret:
-        # капча выключена через настройки
         return True
 
     if not token:
@@ -78,7 +70,6 @@ def _verify_recaptcha(token: str, remote_ip: str | None = None) -> bool:
         out = resp.json()
         return bool(out.get("success"))
     except Exception:
-        # если сервер капчи лёг — лучше не пропускать ботов
         return False
 
 
@@ -92,9 +83,7 @@ def join_participants(
     request: Request,
     db: Session = Depends(get_db),
 ):
-    # --- reCAPTCHA ---
     if settings.RECAPTCHA_SECRET:
-        # капча включена → токен обязателен
         if not payload.recaptcha_token:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
@@ -109,10 +98,8 @@ def join_participants(
                 detail="Captcha verification failed.",
             )
 
-    # --- Валидация кошелька ---
     wallet = _validate_solana_wallet(payload.wallet)
 
-    # Уже есть такой участник?
     existing = db.query(models.Participant).filter_by(wallet=wallet).first()
     if existing:
         return ParticipantJoinResponse(
@@ -127,7 +114,6 @@ def join_participants(
         db.commit()
         db.refresh(participant)
     except IntegrityError:
-        # На случай гонки: второй параллельный INSERT того же кошелька
         db.rollback()
         return ParticipantJoinResponse(
             ok=True,

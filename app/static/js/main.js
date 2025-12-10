@@ -1,4 +1,3 @@
-// ===== Join form (with optional reCAPTCHA) =====
 
 const joinForm = document.getElementById("join-form");
 const walletInput = document.getElementById("wallet-input");
@@ -15,7 +14,7 @@ if (joinForm) {
       return;
     }
 
-    // reCAPTCHA (если скрипт подключен и виджет есть)
+
     let recaptchaToken = null;
     if (window.grecaptcha) {
       recaptchaToken = grecaptcha.getResponse();
@@ -48,9 +47,7 @@ if (joinForm) {
         setJoinMessage(detail, false);
       } else {
         setJoinMessage(data.message || "Success.", true);
-        // очищаем поле
         walletInput.value = "";
-        // сбрасываем капчу
         if (window.grecaptcha) {
           grecaptcha.reset();
         }
@@ -72,10 +69,8 @@ function setJoinMessage(text, isOk) {
   joinMessage.classList.add(isOk ? "ok" : "error");
 }
 
-// ===== Winners list (show txid + amount) =====
 
 const winnersListEl = document.getElementById("winners-list");
-// Используем Set, чтобы не дублировать уже показанные победы
 let lastSeenKeys = new Set();
 
 async function fetchLatestWinners() {
@@ -94,7 +89,6 @@ async function fetchLatestWinners() {
       addWinnerRow(winner);
     });
 
-    // Чтобы Set не разрастался бесконечно
     if (lastSeenKeys.size > 200) {
       lastSeenKeys = new Set(Array.from(lastSeenKeys).slice(-100));
     }
@@ -126,21 +120,18 @@ function addWinnerRow(winner) {
     <span class="winner-row-amount">${amount} SOL</span>
   `;
 
-  // Добавляем в начало списка
   if (winnersListEl.firstChild) {
     winnersListEl.insertBefore(li, winnersListEl.firstChild);
   } else {
     winnersListEl.appendChild(li);
   }
 
-  // Ограничиваем длину списка
   const maxRows = 50;
   while (winnersListEl.children.length > maxRows) {
     winnersListEl.removeChild(winnersListEl.lastChild);
   }
 }
 
-// Первичная загрузка и обновление каждые 10 секунд
 if (winnersListEl) {
   fetchLatestWinners();
   setInterval(fetchLatestWinners, 10000);

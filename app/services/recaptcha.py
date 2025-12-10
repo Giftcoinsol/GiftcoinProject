@@ -5,13 +5,8 @@ from ..config import settings
 
 
 def verify_recaptcha(token: str, remote_ip: Optional[str] = None) -> bool:
-    """
-    Verify Google reCAPTCHA v3 token.
-    If RECAPTCHA_SECRET is not set, captcha is treated as disabled (always True).
-    """
     secret = settings.RECAPTCHA_SECRET
     if not secret:
-        # Captcha disabled – always allow (useful for local dev)
         return True
 
     if not token:
@@ -43,11 +38,9 @@ def verify_recaptcha(token: str, remote_ip: Optional[str] = None) -> bool:
     if not success:
         return False
 
-    # Simple threshold for v3
     if score < 0.3:
         return False
 
-    # We expect action="join" from front-end
     if action and action != "join":
         return False
 

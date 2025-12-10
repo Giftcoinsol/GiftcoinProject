@@ -9,11 +9,6 @@ from app.database import Base
 
 
 class Raffle(Base):
-    """
-    Таблица раффлов (для логики, отчётов, истории).
-    В проекте можно иметь один активный раффл (ACTIVE_RAFFLE_ID),
-    остальные — для истории/админки.
-    """
     __tablename__ = "raffles"
 
     id = Column(Integer, primary_key=True, index=True)
@@ -29,11 +24,6 @@ class Raffle(Base):
 
 
 class Participant(Base):
-    """
-    Глобальный список участников.
-    Один кошелёк → одна строка.
-    Участвует во всех раффлах по умолчанию.
-    """
     __tablename__ = "participants"
 
     id = Column(Integer, primary_key=True, index=True)
@@ -46,9 +36,6 @@ class Participant(Base):
 
 
 class RaffleWinner(Base):
-    """
-    История победителей: кто выиграл, в каком раффле, сколько получил, какая транзакция.
-    """
     __tablename__ = "raffle_winners"
 
     id = Column(Integer, primary_key=True, index=True)

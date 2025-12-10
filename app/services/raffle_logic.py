@@ -15,10 +15,6 @@ def get_active_raffle(db: Session, raffle_id: int) -> models.Raffle | None:
 
 
 def add_participant(db: Session, wallet: str) -> models.Participant:
-    """
-    Добавляем кошелёк в глобальный список участников.
-    Один кошелёк = одна строка (UNIQUE).
-    """
     participant = models.Participant(wallet=wallet)
     db.add(participant)
     db.commit()
@@ -27,9 +23,6 @@ def add_participant(db: Session, wallet: str) -> models.Participant:
 
 
 def get_random_participant(db: Session) -> models.Participant | None:
-    """
-    Случайный участник из глобального списка participants.
-    """
     return db.query(models.Participant).order_by(func.random()).first()
 
 
